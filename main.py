@@ -1,36 +1,50 @@
 import pygame
 
+from Config import Config
 from Bubble import Bubble
+from Shooter import Shooter
 
-pygame.init()
 
-infoObject = pygame.display.Info()
+def main():
+    screen = pygame.display.set_mode((Config.SCREEN_WIDTH, Config.SCREEN_HEIGHT))
+    clock = pygame.time.Clock()
+    running = True
 
-screen = pygame.display.set_mode((infoObject.current_w, infoObject.current_h))
-clock = pygame.time.Clock()
-running = True
+    player_1_bubble = Bubble(0, 0)
+    player_2_shooter = Shooter(Config.SCREEN_WIDTH / 2, Config.SCREEN_HEIGHT - 200)
 
-player_1_bubble = Bubble(0, 0)
+    map_background = pygame.image.load("./Assets/background.jpg")
+    map_background = pygame.transform.scale(map_background, (Config.SCREEN_WIDTH, Config.SCREEN_HEIGHT))
 
-map_background = pygame.image.load("./Assets/background.jpg")
-map_background = pygame.transform.scale(map_background, (infoObject.current_w, infoObject.current_h))
+    while running:
+        screen.blit(map_background, (0, 0))
 
-while running:
-    screen.blit(map_background, (0, 0))
+        screen.blit(player_1_bubble.sprite, (player_1_bubble.x_pos, player_1_bubble.y_pos))
+        screen.blit(player_2_shooter.sprite, (player_2_shooter.x_pos, player_2_shooter.y_pos))
 
-    screen.blit(player_1_bubble.sprite, (player_1_bubble.x_pos, player_1_bubble.y_pos))
+        key = pygame.key.get_pressed()
+        for event in pygame.event.get():
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    running = False
 
-    key = pygame.key.get_pressed()
-    if key[pygame.K_ESCAPE]:
-        running = False
-    player_1_bubble.handle_movement(key)
+        for projectile in player_2_shooter.projectiles.copy():
+            if projectile.y_pos > -50:
+                screen.blit(projectile.sprite, (projectile.x_pos, projectile.y_pos))
+                projectile.update_position()
+            else:
+                player_2_shooter.projectiles.remove(projectile)
+            if projectile.collide_bubble(player_1_bubble):
+                print("Game over")
 
-    for event in pygame.event.get():
-        if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_ESCAPE:
-                running = False
+        player_1_bubble.handle_movement(key)
+        player_2_shooter.handle_controls(key)
 
-    pygame.display.flip()
-    clock.tick(60)
+        pygame.display.flip()
+        clock.tick(Config.FPS)
 
-pygame.quit()
+    pygame.quit()
+
+
+if __name__ == "__main__":
+    main()
