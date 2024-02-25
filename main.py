@@ -3,6 +3,7 @@ import pygame
 from Config import Config
 from Bubble import Bubble
 from Shooter import Shooter
+from random import randint
 
 screen = pygame.display.set_mode((Config.SCREEN_WIDTH, Config.SCREEN_HEIGHT))
 
@@ -17,11 +18,19 @@ def main():
     map_background = pygame.image.load("./Assets/background.jpg")
     map_background = pygame.transform.scale(map_background, (Config.SCREEN_WIDTH, Config.SCREEN_HEIGHT))
 
+    bubbles = []
+
+    for i in range(50):
+        bubbles.append(Bubble(randint(3, Config.SCREEN_WIDTH), randint(3, Config.SCREEN_HEIGHT)))
+
     while running:
         screen.blit(map_background, (0, 0))
 
         screen.blit(player_1_bubble.sprite, (player_1_bubble.x_pos, player_1_bubble.y_pos))
         screen.blit(player_2_shooter.sprite, (player_2_shooter.x_pos, player_2_shooter.y_pos))
+
+        for bubble in bubbles:
+            screen.blit(bubble.sprite, (bubble.x_pos, bubble.y_pos))
 
         key = pygame.key.get_pressed()
         for event in pygame.event.get():
@@ -39,6 +48,11 @@ def main():
                 game_over()
                 running = False
                 break
+            for bubble in bubbles:
+                if projectile.collide_bubble(bubble):
+                    if projectile in player_2_shooter.projectiles:
+                        player_2_shooter.projectiles.remove(projectile)
+                    bubbles.remove(bubble)
 
         player_1_bubble.handle_movement(key)
         player_2_shooter.handle_controls(key)
