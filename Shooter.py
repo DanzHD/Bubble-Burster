@@ -7,7 +7,7 @@ from Config import Config
 
 class Shooter(Player):
 
-    TIME_BETWEEN_SHOTS = 700
+    TIME_BETWEEN_SHOTS = 600
 
     def __init__(self, x_pos, y_pos):
         super().__init__(x_pos, y_pos)
